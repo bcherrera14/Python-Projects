@@ -58,4 +58,82 @@
 #Hint 13: Create a function called compare() and pass in the user_score and computer_score. If the computer and user both have the same score, then it's a draw. If the computer has a blackjack (0), then the user loses. If the user has a blackjack (0), then the user wins. If the user_score is over 21, then the user loses. If the computer_score is over 21, then the computer loses. If none of the above, then the player with the highest score wins.
 
 #Hint 14: Ask the user if they want to restart the game. If they answer yes, clear the console and start a new game of blackjack and show the logo from art.py.
+import random
+import os
 
+clear = lambda: os.system('cls')
+
+cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+drawn_cards = {
+    "player": [],
+    "dealer": [],
+}
+
+def deal_cards(person, num_cards):
+    for num in range(1, num_cards + 1):
+        drawn_cards[person].append(random.choice(cards))
+
+def sum_hand(person):
+    total = 0
+    for card in drawn_cards[person]:
+        total += card
+    return total
+
+def determine_results():
+    player_total = sum_hand("player")
+    dealer_total = sum_hand("dealer")
+    if player_total > dealer_total:
+        print("You Win!")
+    elif player_total == dealer_total:
+        print("It's a draw.")
+    elif dealer_total > 21:
+        print("You Win! Dealer went over.")
+    else:
+        print("Dealer wins.")
+
+def blackjack():
+    start_game = input("Do you want to play a game of Blackjack? Type 'y' or 'n': ")
+    clear()
+    is_bust = False
+    is_game_active = True
+    drawn_cards["player"] = []
+    drawn_cards["dealer"] = []
+    if start_game.lower() == "y":
+        deal_cards("player", 2)
+        if drawn_cards["player"][0] == 11 and drawn_cards["player"][1] == 11:
+            drawn_cards["player"][1] = 1
+        deal_cards("dealer", 1)
+        print(f"Your cards: {drawn_cards["player"]}, current score: {sum_hand("player")}")
+        print(f"Dealers first card: {drawn_cards["dealer"][0]}")
+        while is_game_active:
+            deal_player = input("Type 'y' to get another card, type 'n' to pass: ")
+            if deal_player == "y":
+                deal_cards("player", 1)
+                player_total = sum_hand("player")
+                if player_total > 21:
+                    if 11 in drawn_cards["player"]:
+                        drawn_cards["player"][drawn_cards["player"].index(11)] = 1
+                        player_total = sum_hand("player")
+                    else:
+                        is_game_active = False
+                        is_bust = True
+                print(f"Your cards: {drawn_cards["player"]}, current score: {player_total}")
+                print(f"Dealers first card: {drawn_cards["dealer"][0]}")
+            elif deal_player == "n":
+                is_game_active = False
+        while sum_hand("dealer") < 17:
+            deal_cards("dealer", 1)
+            print(" ")
+        print(f"Your final hand: {drawn_cards["player"]}, final score: {sum_hand("player")}")
+        print(f"Dealer's final hand: {drawn_cards["dealer"]}, final score: {sum_hand("dealer")}")
+        if is_bust:
+            print("You went over. You lose.")
+        else:
+            determine_results()
+        print(" ")
+        blackjack()
+    else:
+        clear()
+        return
+
+blackjack()
